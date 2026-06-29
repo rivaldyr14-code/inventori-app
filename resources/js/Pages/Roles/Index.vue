@@ -87,7 +87,7 @@ function deleteRole() {
                   <td>{{ row.guard_name }}</td>
                   <td><span class="badge" :class="row.is_active ? 'bg-success' : 'bg-secondary'">{{ row.is_active ? 'Aktif' : 'Nonaktif' }}</span></td>
                   <td>{{ row.users_count }}</td>
-                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID') }}</td>
+                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td>
                   <td>
                     <div class="btn-group btn-group-sm">
                       <a :href="`/roles/${row.id}`" class="btn btn-outline-primary" @click.prevent="router.get(`/roles/${row.id}`)"><i class="bi bi-eye"></i></a>

@@ -91,7 +91,7 @@ function typeBadge(type) {
                   <td>{{ row.quantity }}</td>
                   <td>{{ row.stock_before }}</td>
                   <td>{{ row.stock_after }}</td>
-                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID') }}</td>
+                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td>
                   <td>
                     <div class="btn-group btn-group-sm">
                       <a :href="`/stock-transactions/${row.id}`" class="btn btn-outline-primary" @click.prevent="router.get(`/stock-transactions/${row.id}`)"><i class="bi bi-eye"></i></a>

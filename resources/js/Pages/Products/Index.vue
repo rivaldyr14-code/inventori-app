@@ -102,7 +102,7 @@ function deleteMessage(item) {
                   <td>{{ row.current_stock }}</td>
                   <td>{{ formatPrice(row.price) }}</td>
                   <td><span class="badge" :class="statusBadge(row.is_active)">{{ row.is_active ? 'Aktif' : 'Tidak Aktif' }}</span></td>
-                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID') }}</td>
+                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td>
                   <td>
                     <div class="btn-group btn-group-sm">
                       <a :href="`/products/${row.id}`" class="btn btn-outline-primary" @click.prevent="router.get(`/products/${row.id}`)"><i class="bi bi-eye"></i></a>

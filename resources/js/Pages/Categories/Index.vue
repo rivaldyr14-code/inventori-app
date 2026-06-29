@@ -116,7 +116,7 @@ function deleteMessage(category) {
                   <td>{{ row.description || '-' }}</td>
                   <td>{{ row.products_count }}</td>
                   <td><span class="badge" :class="statusBadge(row.is_active)">{{ row.is_active ? 'Aktif' : 'Tidak Aktif' }}</span></td>
-                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID') }}</td>
+                  <td>{{ new Date(row.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td>
                   <td>
                     <div class="btn-group btn-group-sm">
                       <a :href="route('categories.show', row.id)" class="btn btn-outline-primary" @click.prevent="router.get(`/categories/${row.id}`)">

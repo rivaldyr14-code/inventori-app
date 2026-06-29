@@ -62,7 +62,7 @@ const txnColumns = [
                 </table>
               </td>
             </tr>
-            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(product.created_at).toLocaleString('id-ID') }}</td></tr>
+            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(product.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td></tr>
           </table>
         </div>
       </div>
@@ -78,7 +78,7 @@ const txnColumns = [
                 <td>{{ row.quantity }}</td>
                 <td>{{ row.stock_before }}</td>
                 <td>{{ row.stock_after }}</td>
-                <td>{{ new Date(row.created_at).toLocaleDateString('id-ID') }}</td>
+                <td>{{ new Date(row.created_at).toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td>
               </tr>
             </template>
           </DataTable>

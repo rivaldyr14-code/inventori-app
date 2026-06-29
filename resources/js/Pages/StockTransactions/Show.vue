@@ -33,7 +33,7 @@ const props = defineProps({
             <tr><th class="bg-light">Catatan</th><td>{{ stockTransaction.notes || '-' }}</td></tr>
             <tr><th class="bg-light">Dibuat Oleh</th><td>{{ stockTransaction.createdBy?.name || '-' }}</td></tr>
             <tr><th class="bg-light">Lampiran</th><td><a v-if="stockTransaction.attachment_path" :href="`/attachments/stock-transactions/${stockTransaction.id}`" target="_blank" class="btn btn-sm btn-outline-info"><i class="bi bi-paperclip me-1"></i>Download</a><span v-else class="text-muted">Tidak ada</span></td></tr>
-            <tr><th class="bg-light">Tanggal Transaksi</th><td>{{ new Date(stockTransaction.created_at).toLocaleString('id-ID') }}</td></tr>
+            <tr><th class="bg-light">Tanggal Transaksi</th><td>{{ new Date(stockTransaction.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td></tr>
           </table>
         </div>
       </div>

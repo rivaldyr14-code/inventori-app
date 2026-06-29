@@ -41,7 +41,7 @@ function statusBadge(isActive) {
                 </table>
               </td>
             </tr>
-            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(user.created_at).toLocaleString('id-ID') }}</td></tr>
+            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(user.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td></tr>
           </table>
         </div>
       </div>

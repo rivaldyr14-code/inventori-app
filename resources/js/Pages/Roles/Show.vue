@@ -44,7 +44,7 @@ const props = defineProps({
                 </table>
               </td>
             </tr>
-            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(role.created_at).toLocaleString('id-ID') }}</td></tr>
+            <tr><th class="bg-light">Tanggal Dibuat</th><td>{{ new Date(role.created_at).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' }) }}</td></tr>
           </table>
         </div>
       </div>

@@ -54,8 +54,10 @@ const navItems = computed(() => {
     if (isAdministrator.value) {
         items.push({ label: 'Users', href: '/users', icon: 'bi-people' })
         items.push({ label: 'Pending Registrations', href: '/admin/pending-registrations', icon: 'bi-person-check' })
+        items.push({ label: 'Reset Password Requests', href: '/admin/password-resets', icon: 'bi-key' })
     }
 
+    items.push({ label: 'Reset Password', href: '/password-reset-requests', icon: 'bi-key' })
     items.push({ label: 'Export/Import Logs', href: '/export-import-logs', icon: 'bi-clock-history' })
 
     return items

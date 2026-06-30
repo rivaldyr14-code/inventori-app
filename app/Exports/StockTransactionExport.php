@@ -12,27 +12,12 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class StockTransactionExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    private array $headers;
     private int $rowNumber = 1;
 
     public function __construct(
         private Builder $query,
         private array $selectedFields,
-    ) {
-        $fieldLabels = [
-            'transaction_number' => 'No. Transaksi',
-            'product'            => 'Produk',
-            'type'               => 'Tipe',
-            'quantity'           => 'Jumlah',
-            'stock_before'       => 'Stok Sebelum',
-            'stock_after'        => 'Stok Sesudah',
-            'is_active'          => 'Status Aktif',
-            'notes'              => 'Catatan',
-            'created_by'         => 'Dibuat Oleh',
-            'created_at'         => 'Tanggal Transaksi',
-        ];
-        $this->headers = array_map(fn($f) => $fieldLabels[$f] ?? $f, $this->selectedFields);
-    }
+    ) {}
 
     public function collection()
     {
@@ -41,7 +26,7 @@ class StockTransactionExport implements FromCollection, WithHeadings, WithMappin
 
     public function headings(): array
     {
-        return array_merge(['No'], $this->headers);
+        return array_merge(['No'], $this->selectedFields);
     }
 
     public function map($row): array

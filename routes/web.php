@@ -17,6 +17,9 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\StockTransactionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PasswordResetRequestController;
+use App\Http\Controllers\AdminPasswordResetController;
+use App\Http\Controllers\ForgotPasswordController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -46,6 +49,22 @@ Route::get('/register', [RegisteredUserController::class, 'create'])
 
 Route::post('/register', [RegisteredUserController::class, 'store'])
     ->name('register.store');
+
+Route::get('/forgot-password', [ForgotPasswordController::class, 'show'])
+    ->middleware('guest')
+    ->name('password.request');
+
+Route::post('/forgot-password/check', [ForgotPasswordController::class, 'check'])
+    ->middleware('guest')
+    ->name('password.check');
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.email');
+
+Route::post('/forgot-password/{passwordResetRequest}/reset', [ForgotPasswordController::class, 'resetPassword'])
+    ->middleware('guest')
+    ->name('password.reset');
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')
@@ -98,6 +117,17 @@ Route::middleware('auth')->group(function () {
     // User management (admin only)
     Route::resource('users', UserController::class)->middleware('role:Administrator');
 
+    // Password Reset Requests (user)
+    Route::get('/password-reset-requests', [PasswordResetRequestController::class, 'index'])->name('password-reset-requests.index');
+    Route::post('/password-reset-requests', [PasswordResetRequestController::class, 'store'])->name('password-reset-requests.store');
+    Route::post('/password-reset-requests/{passwordResetRequest}/reset', [PasswordResetRequestController::class, 'resetPassword'])->name('password-reset-requests.reset');
+
+    // Admin Password Reset Approvals
+    Route::get('/admin/password-resets', [AdminPasswordResetController::class, 'index'])->name('admin.password-resets.index');
+    Route::get('/admin/password-resets/{passwordResetRequest}', [AdminPasswordResetController::class, 'show'])->name('admin.password-resets.show');
+    Route::post('/admin/password-resets/{passwordResetRequest}/approve', [AdminPasswordResetController::class, 'approve'])->name('admin.password-resets.approve');
+    Route::post('/admin/password-resets/{passwordResetRequest}/reject', [AdminPasswordResetController::class, 'reject'])->name('admin.password-resets.reject');
+
     // Pending registrations (admin only)
     Route::get('/admin/pending-registrations', [PendingRegistrationController::class, 'index'])
         ->middleware('role:Administrator')
@@ -112,8 +142,8 @@ Route::middleware('auth')->group(function () {
     // Export/Import
     Route::post('/export/{entity}', [ExportController::class, 'dispatch'])->name('export.dispatch');
     Route::get('/exports/{log}/download', [ExportController::class, 'download'])->name('export.download');
-    Route::post('/import/{entity}', [ImportController::class, 'dispatch'])->name('import.dispatch');
     Route::post('/import/upload', [ImportController::class, 'upload'])->name('import.upload');
+    Route::post('/import/{entity}', [ImportController::class, 'dispatch'])->name('import.dispatch');
     Route::post('/import/{entity}/preview', [ImportController::class, 'preview'])->name('import.preview');
 
     // Autocomplete API endpoints

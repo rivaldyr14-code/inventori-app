@@ -12,22 +12,12 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
-    private array $headers;
     private int $rowNumber = 1;
 
     public function __construct(
         private Builder $query,
         private array $selectedFields,
-    ) {
-        $fieldLabels = [
-            'name'        => 'Nama',
-            'description' => 'Deskripsi',
-            'is_active'   => 'Status Aktif',
-            'metadata'    => 'Metadata',
-            'created_at'  => 'Tanggal Dibuat',
-        ];
-        $this->headers = array_map(fn($f) => $fieldLabels[$f] ?? $f, $this->selectedFields);
-    }
+    ) {}
 
     public function collection()
     {
@@ -36,7 +26,7 @@ class CategoryExport implements FromCollection, WithHeadings, WithMapping, WithS
 
     public function headings(): array
     {
-        return array_merge(['No'], $this->headers);
+        return array_merge(['No'], $this->selectedFields);
     }
 
     public function map($row): array

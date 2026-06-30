@@ -14,8 +14,6 @@ const props = defineProps({
 const form = useForm({
     name: props.user.name,
     email: props.user.email,
-    password: '',
-    password_confirmation: '',
     role: props.user.roles?.[0]?.name || '',
     is_active: props.user.is_active,
 })
@@ -42,7 +40,7 @@ function submit() {
       </div>
       <div class="card border-0 shadow-sm">
         <div class="card-body">
-          <div class="alert alert-info">Kosongkan password jika tidak ingin mengubahnya.</div>
+          <div class="alert alert-info">Password hanya dapat direset melalui permintaan reset password user.</div>
           <form @submit.prevent="submit" novalidate>
             <div class="row g-3">
               <div class="col-12 col-md-6">
@@ -54,15 +52,6 @@ function submit() {
                 <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
                 <input id="email" v-model="form.email" type="email" class="form-control" :class="{ 'is-invalid': form.errors.email }" />
                 <div v-if="form.errors.email" class="invalid-feedback">{{ form.errors.email }}</div>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="password" class="form-label">Password Baru</label>
-                <input id="password" v-model="form.password" type="password" class="form-control" :class="{ 'is-invalid': form.errors.password }" />
-                <div v-if="form.errors.password" class="invalid-feedback">{{ form.errors.password }}</div>
-              </div>
-              <div class="col-12 col-md-6">
-                <label for="password_confirmation" class="form-label">Konfirmasi Password Baru</label>
-                <input id="password_confirmation" v-model="form.password_confirmation" type="password" class="form-control" />
               </div>
               <div class="col-12 col-md-6">
                 <label for="role" class="form-label">Role <span class="text-danger">*</span></label>

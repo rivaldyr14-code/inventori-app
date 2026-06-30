@@ -47,9 +47,14 @@ class HandleInertiaRequests extends Middleware
                     : null,
             ],
             'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error'   => fn () => $request->session()->get('error'),
-                'warning' => fn () => $request->session()->get('warning'),
+                'success'   => fn () => $request->session()->get('success'),
+                'error'     => fn () => $request->session()->get('error'),
+                'warning'   => fn () => $request->session()->get('warning'),
+                'log_id'    => fn () => $request->session()->get('log_id'),
+                'file_path' => fn () => $request->session()->get('file_path'),
+                'headers'   => fn () => $request->session()->get('headers'),
+                'preview'   => fn () => $request->session()->get('preview'),
+                'message'   => fn () => $request->session()->get('message'),
             ],
         ]);
     }

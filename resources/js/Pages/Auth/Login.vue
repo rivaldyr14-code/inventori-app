@@ -80,7 +80,7 @@ function submit() {
             </div>
 
             <!-- Remember me -->
-            <div class="mb-4 form-check">
+            <div class="mb-2 form-check">
                 <input
                     id="remember"
                     v-model="form.remember"
@@ -88,6 +88,13 @@ function submit() {
                     class="form-check-input"
                 />
                 <label class="form-check-label" for="remember">Ingat saya</label>
+            </div>
+
+            <!-- Forgot password -->
+            <div class="mb-4 text-end">
+                <Link href="/forgot-password" class="text-decoration-none small">
+                    Lupa password?
+                </Link>
             </div>
 
             <!-- Submit -->

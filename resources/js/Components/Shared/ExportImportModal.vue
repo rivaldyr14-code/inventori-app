@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
+import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     entity: String,
@@ -16,7 +17,6 @@ const resultMessage = ref('')
 const resultType = ref('')
 const exportLogId = ref(null)
 
-// Export
 function toggleAllFields() {
     if (selectedFields.value.length === props.availableFields.length) {
         selectedFields.value = []
@@ -34,38 +34,33 @@ function doExport() {
     isProcessing.value = true
     resultMessage.value = ''
 
-    fetch(`/export/${props.entity}`, {
-        method: 'POST',
-        body: JSON.stringify({ selected_fields: selectedFields.value }),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'Accept': 'application/json',
+    router.post(`/export/${props.entity}`, {
+        selected_fields: selectedFields.value,
+    }, {
+        preserveState: true,
+        onFinish: () => { isProcessing.value = false },
+        onSuccess: (page) => {
+            const flash = page.props.flash
+            resultMessage.value = flash?.success || 'Export berhasil.'
+            resultType.value = 'success'
+            if (flash?.log_id) {
+                exportLogId.value = flash.log_id
+                resultMessage.value = flash.success || 'Export berhasil. File akan didownload.'
+                window.location.href = `/exports/${flash.log_id}/download`
+            }
         },
-    })
-    .then(r => r.json())
-    .then(data => {
-        exportLogId.value = data.log_id || null
-        resultMessage.value = data.message || 'Export berhasil.'
-        resultType.value = 'success'
-        isProcessing.value = false
-        if (data.log_id) {
-            window.location.href = `/exports/${data.log_id}/download`
-        }
-    })
-    .catch(() => {
-        resultMessage.value = 'Gagal menjalankan export.'
-        resultType.value = 'danger'
-        isProcessing.value = false
+        onError: (errors) => {
+            resultMessage.value = errors.message || 'Gagal menjalankan export.'
+            resultType.value = 'danger'
+        },
     })
 }
 
-// Import
 const importFile = ref(null)
 const uploadProgress = ref(false)
 const uploadedFilePath = ref('')
 const fileHeaders = ref([])
-const previewData = ref([])
+const previewData = ref({})
 const columnMapping = ref({})
 const importStep = ref('upload')
 const importResult = ref('')
@@ -84,93 +79,63 @@ function uploadFile() {
     const formData = new FormData()
     formData.append('file', importFile.value)
 
-    fetch('/import/upload', {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'Accept': 'application/json',
+    router.post('/import/upload', formData, {
+        forceFormData: true,
+        preserveState: true,
+        onFinish: () => { uploadProgress.value = false },
+        onSuccess: (page) => {
+            const flash = page.props.flash
+            if (!flash?.file_path) {
+                importResult.value = flash?.message || 'Upload gagal.'
+                return
+            }
+            uploadedFilePath.value = flash.file_path
+            doPreview(flash.file_path)
+        },
+        onError: (errors) => {
+            importResult.value = errors.file || errors.message || 'Gagal upload file.'
         },
     })
-    .then(async r => {
-        const data = await r.json().catch(() => ({}))
-        if (!r.ok) {
-            const msg = data.message || (data.errors?.file?.[0]) || `HTTP ${r.status}`
-            throw new Error(msg)
-        }
-        return data
-    })
-    .then(data => {
-        if (!data.file_path) {
-            throw new Error(data.message || 'Upload gagal: file_path tidak ditemukan')
-        }
-        uploadedFilePath.value = data.file_path
-        return fetch(`/import/${props.entity}/preview`, {
-            method: 'POST',
-            body: JSON.stringify({ file_path: data.file_path }),
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-                'Accept': 'application/json',
-            },
-        })
-    })
-    .then(async r => {
-        const data = await r.json().catch(() => ({}))
-        if (!r.ok) {
-            throw new Error(data.message || `HTTP ${r.status}`)
-        }
-        return data
-    })
-    .then(data => {
-        if (data.message && !data.headers) {
-            throw new Error(data.message)
-        }
-        fileHeaders.value = data.headers || []
-        previewData.value = data.preview || {}
-        props.availableFields.forEach(f => {
-            columnMapping.value[f] = fileHeaders.value.find(h => h.toLowerCase() === f.toLowerCase()) || ''
-        })
-        importStep.value = 'map'
-        uploadProgress.value = false
-    })
-    .catch(err => {
-        importResult.value = err.message || 'Gagal upload/preview file.'
-        uploadProgress.value = false
+}
+
+function doPreview(filePath) {
+    router.post(`/import/${props.entity}/preview`, { file_path: filePath }, {
+        preserveState: true,
+        onSuccess: (page) => {
+            const flash = page.props.flash
+            fileHeaders.value = flash?.headers || []
+            previewData.value = flash?.preview || {}
+            props.availableFields.forEach(f => {
+                columnMapping.value[f] = fileHeaders.value.find(h => h.toLowerCase() === f.toLowerCase()) || ''
+            })
+            importStep.value = 'map'
+        },
+        onError: (err) => {
+            importResult.value = err.message || 'Gagal preview file.'
+        },
     })
 }
 
 function doImport() {
     if (!uploadedFilePath.value) {
-        importResult.value = 'File belum diupload. Silakan upload file terlebih dahulu.'
+        importResult.value = 'File belum diupload.'
         return
     }
     isProcessing.value = true
     importResult.value = ''
 
-    fetch(`/import/${props.entity}`, {
-        method: 'POST',
-        body: JSON.stringify({
-            file_path: uploadedFilePath.value,
-            column_mapping: columnMapping.value,
-        }),
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'Accept': 'application/json',
+    router.post(`/import/${props.entity}`, {
+        file_path: uploadedFilePath.value,
+        column_mapping: columnMapping.value,
+    }, {
+        preserveState: true,
+        onFinish: () => { isProcessing.value = false },
+        onSuccess: (page) => {
+            importResult.value = page.props.flash?.success || 'Import sedang diproses.'
         },
-    })
-    .then(r => {
-        if (!r.ok) return r.json().then(err => { throw new Error(err.message || 'Import gagal') })
-        return r.json()
-    })
-    .then(data => {
-        importResult.value = data.message || 'Import sedang diproses. Cek halaman Log Export/Import untuk melihat hasil.'
-        isProcessing.value = false
-    })
-    .catch(() => {
-        importResult.value = 'Gagal menjalankan import.'
-        isProcessing.value = false
+        onError: (errors) => {
+            importResult.value = errors.message || 'Gagal menjalankan import.'
+        },
     })
 }
 </script>
@@ -187,7 +152,6 @@ function doImport() {
           <button type="button" class="btn-close" @click="emit('close')"></button>
         </div>
         <div class="modal-body">
-          <!-- Tabs -->
           <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
               <button class="nav-link" :class="{ active: activeTab === 'export' }" @click="activeTab = 'export'">
@@ -201,7 +165,6 @@ function doImport() {
             </li>
           </ul>
 
-          <!-- EXPORT TAB -->
           <div v-if="activeTab === 'export'">
             <p class="text-muted small mb-2">Pilih kolom yang ingin di-export ke Excel:</p>
             <div class="mb-2">
@@ -224,9 +187,7 @@ function doImport() {
             </button>
           </div>
 
-          <!-- IMPORT TAB -->
           <div v-if="activeTab === 'import'">
-            <!-- Step 1: Upload -->
             <div v-if="importStep === 'upload'">
               <p class="text-muted small mb-2">Upload file Excel (.xlsx, .xls, .csv) untuk diimport:</p>
               <div class="mb-3">
@@ -239,7 +200,6 @@ function doImport() {
               </button>
             </div>
 
-            <!-- Step 2: Column Mapping -->
             <div v-if="importStep === 'map'">
               <p class="text-muted small mb-2">Mapping kolom Excel ke field aplikasi:</p>
               <div class="table-responsive mb-3">
@@ -271,7 +231,6 @@ function doImport() {
             </div>
           </div>
 
-          <!-- Result messages -->
           <div v-if="resultMessage" class="alert mt-3" :class="`alert-${resultType}`">{{ resultMessage }}</div>
           <div v-if="importResult" class="alert mt-3 alert-info">{{ importResult }}</div>
         </div>

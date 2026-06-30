@@ -123,10 +123,6 @@ class UserController extends Controller
         $roleName = $data['role'] ?? null;
         unset($data['role']);
 
-        if (empty($data['password'])) {
-            unset($data['password']);
-        }
-
         if (isset($data['preferences']) && is_string($data['preferences']) && $data['preferences'] !== '') {
             $decoded = json_decode($data['preferences'], true);
             if (json_last_error() !== JSON_ERROR_NONE) {

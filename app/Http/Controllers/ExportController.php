@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ExportJob;
 use App\Models\ExportImportLog;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ExportController extends Controller
 {
@@ -22,10 +22,10 @@ class ExportController extends Controller
         'roles'              => ['name', 'guard_name', 'is_active', 'settings', 'created_at'],
     ];
 
-    public function dispatch(Request $request, string $entity): JsonResponse
+    public function dispatch(Request $request, string $entity)
     {
         if (! in_array($entity, self::ALLOWED_ENTITIES)) {
-            return response()->json(['message' => 'Entity not supported.'], 422);
+            return back()->withErrors(['message' => 'Entity not supported.']);
         }
 
         $validated = $request->validate([
@@ -41,17 +41,17 @@ class ExportController extends Controller
             'selected_fields' => $validated['selected_fields'],
         ]);
 
-        $filters = $request->except(['selected_fields', '_token']);
+        $filters = $request->except(['selected_fields', '_token', '_method']);
 
         ExportJob::dispatch($log->id, $entity, $filters, $validated['selected_fields'], auth()->id());
 
-        return response()->json([
-            'message' => 'Export sedang diproses di background.',
+        return back()->with([
+            'success' => 'Export sedang diproses di background.',
             'log_id'  => $log->id,
         ]);
     }
 
-    public function download(string $logId)
+    public function download(string $logId): StreamedResponse
     {
         $log = ExportImportLog::findOrFail($logId);
 
